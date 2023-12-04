@@ -1,0 +1,47 @@
+#pragma once
+#pragma once
+#include <string>
+#include <queue>
+#include <mutex>
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <condition_variable>
+#include <memory>
+#include <functional>
+using namespace std;
+#include "Connection.h"
+
+
+class MySQLConnectionPool
+{
+public:
+
+	static MySQLConnectionPool* getConnectionPool();
+	
+	shared_ptr<Connection> getConnection();
+private:
+	
+	MySQLConnectionPool();
+	
+	bool loadConfigFile();
+	
+	void produceConnectionTask();
+
+	void scannerConnectionTask();
+
+	string _ip;
+	unsigned short _port;
+	string _username;
+	string _password;
+	string _dbname;
+	int _initSize;
+	int _maxSize;
+	int _maxIdleTime;
+	int _connectionTimeout;
+
+	queue<Connection*> _connectionQue;
+	mutex _queueMutex;
+	atomic_int _connectionCnt;
+	condition_variable cv;
+};
